@@ -83,7 +83,6 @@
 </div>
 
 <script>
-    // YOUR PASTED GOOGLE APPS SCRIPT WEB APP URL
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqba4-K1sdv3ugha_1gDGAyqmgUUZYXn6tXLNz0KM6i8iNIeRCP-cXMzqAxQTQLpQf/exec";
 
     async function loadSheetData() {
@@ -93,7 +92,7 @@
             renderTasks(data);
         } catch (error) {
             console.error("Error loading sheet data:", error);
-            document.getElementById('taskList').innerHTML = "<p style='text-align:center; color:red;'>Failed to load steps from Google Sheet. Make sure 'Who has access' is set to 'Anyone' in Apps Script.</p>";
+            document.getElementById('taskList').innerHTML = "<p style='text-align:center; color:red;'>Failed to load steps. Ensure 'Who has access' is set to 'Anyone' in Apps Script.</p>";
         }
     }
 
