@@ -83,22 +83,17 @@
 </div>
 
 <script>
-    // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
+    // YOUR PASTED GOOGLE APPS SCRIPT WEB APP URL
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqba4-K1sdv3ugha_1gDGAyqmgUUZYXn6tXLNz0KM6i8iNIeRCP-cXMzqAxQTQLpQf/exec";
 
     async function loadSheetData() {
-        if (GOOGLE_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbyqba4-K1sdv3ugha_1gDGAyqmgUUZYXn6tXLNz0KM6i8iNIeRCP-cXMzqAxQTQLpQf/exec") {
-            document.getElementById('taskList').innerHTML = "<p style='text-align:center;'>Please paste your Web App URL inside index.html</p>";
-            return;
-        }
-
         try {
             const response = await fetch(GOOGLE_SCRIPT_URL);
             const data = await response.json();
             renderTasks(data);
         } catch (error) {
             console.error("Error loading sheet data:", error);
-            document.getElementById('taskList').innerHTML = "Failed to load steps from Google Sheet.";
+            document.getElementById('taskList').innerHTML = "<p style='text-align:center; color:red;'>Failed to load steps from Google Sheet. Make sure 'Who has access' is set to 'Anyone' in Apps Script.</p>";
         }
     }
 
@@ -127,19 +122,17 @@
     }
 
     async function updateStatus(step, newStatus) {
-        // Update local UI state immediately for responsive feel
         const card = document.querySelector(`.task-card:nth-child(${step})`);
         if (card) {
             card.setAttribute('data-status', newStatus);
             card.querySelector('.status-badge').innerText = `Status: ${newStatus}`;
         }
 
-        // Send payload to Apps Script
         try {
             await fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify({ step: step, status: newStatus })
             });
         } catch (e) {
