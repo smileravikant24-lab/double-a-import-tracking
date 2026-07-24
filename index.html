@@ -21,6 +21,14 @@
         h1 {
             text-align: center;
             color: #0f172a;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-top: 0;
+            margin-bottom: 25px;
         }
 
         .task-card {
@@ -53,6 +61,7 @@
             font-size: 1em;
             font-weight: 600;
             margin: 4px 0;
+            color: #1e293b;
         }
 
         .status-badge {
@@ -68,7 +77,10 @@
             font-weight: 600;
             cursor: pointer;
             color: white;
+            transition: opacity 0.2s;
         }
+
+        .btns button:hover { opacity: 0.85; }
 
         .btn-pending { background-color: #f59e0b; }
         .btn-approved { background-color: #3b82f6; }
@@ -79,41 +91,84 @@
 
 <div class="container">
     <h1>Double A Import Process Tracker</h1>
-    <div id="taskList">Loading steps from Google Sheet...</div>
+    <p class="subtitle">Complete every step sequentially to prevent penalties.</p>
+    <div id="taskList"></div>
 </div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqba4-K1sdv3ugha_1gDGAyqmgUUZYXn6tXLNz0KM6i8iNIeRCP-cXMzqAxQTQLpQf/exec";
 
-    async function loadSheetData() {
-        try {
-            const response = await fetch(GOOGLE_SCRIPT_URL);
-            const data = await response.json();
-            renderTasks(data);
-        } catch (error) {
-            console.error("Error loading sheet data:", error);
-            document.getElementById('taskList').innerHTML = "<p style='text-align:center; color:red;'>Failed to load steps. Ensure 'Who has access' is set to 'Anyone' in Apps Script.</p>";
-        }
-    }
+    // All 44 Shipping Steps
+    const steps = [
+        "Receive Proforma Invoice (PI) then Check and Confirm PI qty and port",
+        "Check all details of PI sent by mill and resend signed PI to mill",
+        "Approve draft Commercial Invoice by mill",
+        "Check Commercial Invoice and send to mill again",
+        "Track containers for 1 week",
+        "Email documents (Commercial Invoice, Packing list, Container list, BL, Insurance, Form) to CHA",
+        "File PIMS with details about containers",
+        "Track ship or container daily wherever container was not arrived",
+        "Track original document given by Double A",
+        "Receive draft Bill of Entry by CHA",
+        "Check draft Bill of Entry and submit for approval",
+        "Hand over original physical documents to CHA",
+        "Track status after container arrives at port",
+        "At time of Rail-out CHA submits Bill of Entry",
+        "Obtain and check OCC (Out of Charges Copy) & Gate Pass",
+        "Pay Duty & E-challan between Port to destination",
+        "Ask CMA for shipping line amount & Invoice",
+        "Check shipping line invoice and make payment",
+        "Pay advance payment to DICT for cleaners",
+        "Provide authority letter to shipping line",
+        "E-Bond print and generate",
+        "Sign E-Bond by Mr. Pranav Satija",
+        "Verify sign by bank",
+        "Give original bond to CHA",
+        "Pay shipping line due to DICT and get gate pass",
+        "Receive DICT invoice",
+        "Give Gate pass, DO, Bill of entry, OCC & Gate Pass to transporter",
+        "Create E-way bill and give to transporter",
+        "Follow-up with Driver during transit",
+        "If container damaged: email shipping line immediately",
+        "If damage is big: pay damage amount to shipping line (₹2000/container)",
+        "Give bill to transporter",
+        "Mark Payment of mill (Double A)",
+        "Approve Payment amount of Double A by Mr. Pranav Satija",
+        "Email approval screenshot to Bank",
+        "Receive MT103 from bank",
+        "Email MT103 to Double A for payment confirmation",
+        "Receive email about payment amount, bank charges, and commission",
+        "Create costing sheet about expenses",
+        "Send costing sheet to Mr. Pranav Satija",
+        "Mark Knock-off Bill of Entry",
+        "Approval of knock-off bill of entry by Mr. Pranav Satija",
+        "Acknowledgment of knock-off entry by bank",
+        "Receive bill from clearing agent, check, pay, and deduct TDS"
+    ];
 
-    function renderTasks(data) {
+    let taskStatuses = {};
+
+    function renderTasks() {
         const list = document.getElementById('taskList');
         list.innerHTML = '';
 
-        data.forEach(row => {
+        steps.forEach((title, index) => {
+            const stepNum = index + 1;
+            const status = taskStatuses[stepNum] || 'Pending';
+
             const card = document.createElement('div');
             card.className = 'task-card';
-            card.setAttribute('data-status', row.status);
+            card.setAttribute('data-status', status);
             card.innerHTML = `
                 <div class="task-info">
-                    <span class="step-num">STEP ${row.step}</span>
-                    <div class="task-title">${row.title}</div>
-                    <span class="status-badge">Status: ${row.status}</span>
+                    <span class="step-num">STEP ${stepNum}</span>
+                    <div class="task-title">${title}</div>
+                    <span class="status-badge">Status: <span id="status-text-${stepNum}">${status}</span></span>
                 </div>
                 <div class="btns">
-                    <button class="btn-pending" onclick="updateStatus(${row.step}, 'Pending')">Pending</button>
-                    <button class="btn-approved" onclick="updateStatus(${row.step}, 'Approved')">Approved</button>
-                    <button class="btn-done" onclick="updateStatus(${row.step}, 'Done')">Done</button>
+                    <button class="btn-pending" onclick="updateStatus(${stepNum}, 'Pending')">Pending</button>
+                    <button class="btn-approved" onclick="updateStatus(${stepNum}, 'Approved')">Approved</button>
+                    <button class="btn-done" onclick="updateStatus(${stepNum}, 'Done')">Done</button>
                 </div>
             `;
             list.appendChild(card);
@@ -121,12 +176,16 @@
     }
 
     async function updateStatus(step, newStatus) {
+        taskStatuses[step] = newStatus;
+        
+        // Update UI immediately
         const card = document.querySelector(`.task-card:nth-child(${step})`);
         if (card) {
             card.setAttribute('data-status', newStatus);
-            card.querySelector('.status-badge').innerText = `Status: ${newStatus}`;
+            document.getElementById(`status-text-${step}`).innerText = newStatus;
         }
 
+        // Send update to Google Sheet in background
         try {
             await fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
@@ -135,11 +194,12 @@
                 body: JSON.stringify({ step: step, status: newStatus })
             });
         } catch (e) {
-            console.error("Failed to update status in sheet:", e);
+            console.error("Failed to update status in Google Sheet:", e);
         }
     }
 
-    loadSheetData();
+    // Render immediately on page load
+    renderTasks();
 </script>
 </body>
 </html>
