@@ -3,203 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Double A Import Process Tracker</title>
+    <title>Double A - PO Flowchart Management System (FMS)</title>
     <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #2563eb;
+            --success: #10b981;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #f8fafc;
+            background-color: var(--bg);
             color: #334155;
             margin: 0;
-            padding: 20px;
+            padding: 24px;
         }
 
         .container {
-            max-width: 850px;
+            max-width: 1000px;
             margin: 0 auto;
         }
 
-        h1 {
-            text-align: center;
-            color: #0f172a;
-            margin-bottom: 5px;
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 16px;
         }
 
-        .subtitle {
-            text-align: center;
-            color: #64748b;
-            margin-top: 0;
-            margin-bottom: 25px;
+        h1 { margin: 0; color: var(--primary); font-size: 1.5rem; }
+
+        .form-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label { font-size: 0.85rem; font-weight: 600; color: #64748b; }
+        input {
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        button.btn-primary {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
         }
 
         .task-card {
-            background: #ffffff;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-left: 6px solid var(--accent);
             border-radius: 8px;
             padding: 16px;
             margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border-left: 6px solid #f59e0b;
         }
 
-        .task-card[data-status="Approved"] { border-left-color: #3b82f6; }
-        .task-card[data-status="Done"] { border-left-color: #10b981; }
-
-        .task-info {
-            flex: 1;
-            padding-right: 16px;
-        }
-
-        .step-num {
-            font-size: 0.8em;
+        .task-meta {
+            display: flex;
+            gap: 8px;
+            font-size: 0.8rem;
             font-weight: 700;
-            color: #64748b;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
         }
 
-        .task-title {
-            font-size: 1em;
-            font-weight: 600;
-            margin: 4px 0;
-            color: #1e293b;
-        }
+        .badge-po { background: #dbeafe; color: #1e40af; padding: 3px 10px; border-radius: 4px; }
+        .badge-container { background: #fef3c7; color: #92400e; padding: 3px 10px; border-radius: 4px; }
+        .badge-step { background: #f1f5f9; color: #475569; padding: 3px 10px; border-radius: 4px; }
 
-        .status-badge {
-            font-size: 0.85em;
-            font-weight: bold;
-        }
+        .task-title { font-weight: 600; font-size: 1rem; color: #1e293b; margin-bottom: 6px; }
+        .date-info { font-size: 0.85rem; color: #64748b; }
 
-        .btns button {
-            border: none;
-            padding: 8px 12px;
-            margin-left: 4px;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
+        .btn-done {
+            background: var(--success);
             color: white;
-            transition: opacity 0.2s;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
         }
 
-        .btns button:hover { opacity: 0.85; }
-
-        .btn-pending { background-color: #f59e0b; }
-        .btn-approved { background-color: #3b82f6; }
-        .btn-done { background-color: #10b981; }
+        .btn-done:hover { background: #059669; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Double A Import Process Tracker</h1>
-    <p class="subtitle">Complete every step sequentially to prevent penalties.</p>
-    <div id="taskList"></div>
+    <div class="header">
+        <h1>Double A - Purchase Order (PO) Flowchart System</h1>
+        <button onclick="loadTasks()" class="btn-primary" style="background:#64748b;">Refresh FMS</button>
+    </div>
+
+    <!-- START NEW PO FORM -->
+    <div class="form-card">
+        <div class="form-group">
+            <label>PO Number *</label>
+            <input type="text" id="poNumber" placeholder="e.g., PO-2026-9988">
+        </div>
+        <div class="form-group">
+            <label>Container No(s) (Optional)</label>
+            <input type="text" id="containerNos" placeholder="e.g., MSKU1234567, TGHU9876543">
+        </div>
+        <div class="form-group">
+            <label>PO Start Date</label>
+            <input type="date" id="startDate">
+        </div>
+        <div class="form-group">
+            <label>Step Gap (Days)</label>
+            <input type="number" id="gapDays" value="7">
+        </div>
+        <button class="btn-primary" onclick="createNewPO()">+ Initialize New PO</button>
+    </div>
+
+    <h3>Active Pending Tasks Across All Purchase Orders</h3>
+    <div id="taskList">Loading active workflows...</div>
 </div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqba4-K1sdv3ugha_1gDGAyqmgUUZYXn6tXLNz0KM6i8iNIeRCP-cXMzqAxQTQLpQf/exec";
 
-    // All 44 Shipping Steps
-    const steps = [
-        "Receive Proforma Invoice (PI) then Check and Confirm PI qty and port",
-        "Check all details of PI sent by mill and resend signed PI to mill",
-        "Approve draft Commercial Invoice by mill",
-        "Check Commercial Invoice and send to mill again",
-        "Track containers for 1 week",
-        "Email documents (Commercial Invoice, Packing list, Container list, BL, Insurance, Form) to CHA",
-        "File PIMS with details about containers",
-        "Track ship or container daily wherever container was not arrived",
-        "Track original document given by Double A",
-        "Receive draft Bill of Entry by CHA",
-        "Check draft Bill of Entry and submit for approval",
-        "Hand over original physical documents to CHA",
-        "Track status after container arrives at port",
-        "At time of Rail-out CHA submits Bill of Entry",
-        "Obtain and check OCC (Out of Charges Copy) & Gate Pass",
-        "Pay Duty & E-challan between Port to destination",
-        "Ask CMA for shipping line amount & Invoice",
-        "Check shipping line invoice and make payment",
-        "Pay advance payment to DICT for cleaners",
-        "Provide authority letter to shipping line",
-        "E-Bond print and generate",
-        "Sign E-Bond by Mr. Pranav Satija",
-        "Verify sign by bank",
-        "Give original bond to CHA",
-        "Pay shipping line due to DICT and get gate pass",
-        "Receive DICT invoice",
-        "Give Gate pass, DO, Bill of entry, OCC & Gate Pass to transporter",
-        "Create E-way bill and give to transporter",
-        "Follow-up with Driver during transit",
-        "If container damaged: email shipping line immediately",
-        "If damage is big: pay damage amount to shipping line (₹2000/container)",
-        "Give bill to transporter",
-        "Mark Payment of mill (Double A)",
-        "Approve Payment amount of Double A by Mr. Pranav Satija",
-        "Email approval screenshot to Bank",
-        "Receive MT103 from bank",
-        "Email MT103 to Double A for payment confirmation",
-        "Receive email about payment amount, bank charges, and commission",
-        "Create costing sheet about expenses",
-        "Send costing sheet to Mr. Pranav Satija",
-        "Mark Knock-off Bill of Entry",
-        "Approval of knock-off bill of entry by Mr. Pranav Satija",
-        "Acknowledgment of knock-off entry by bank",
-        "Receive bill from clearing agent, check, pay, and deduct TDS"
-    ];
+    // Set default date picker to today
+    document.getElementById('startDate').valueAsDate = new Date();
 
-    let taskStatuses = {};
-
-    function renderTasks() {
+    async function loadTasks() {
         const list = document.getElementById('taskList');
-        list.innerHTML = '';
+        list.innerHTML = 'Loading active workflows...';
 
-        steps.forEach((title, index) => {
-            const stepNum = index + 1;
-            const status = taskStatuses[stepNum] || 'Pending';
+        try {
+            const response = await fetch(GOOGLE_SCRIPT_URL);
+            const tasks = await response.json();
 
-            const card = document.createElement('div');
-            card.className = 'task-card';
-            card.setAttribute('data-status', status);
-            card.innerHTML = `
-                <div class="task-info">
-                    <span class="step-num">STEP ${stepNum}</span>
-                    <div class="task-title">${title}</div>
-                    <span class="status-badge">Status: <span id="status-text-${stepNum}">${status}</span></span>
-                </div>
-                <div class="btns">
-                    <button class="btn-pending" onclick="updateStatus(${stepNum}, 'Pending')">Pending</button>
-                    <button class="btn-approved" onclick="updateStatus(${stepNum}, 'Approved')">Approved</button>
-                    <button class="btn-done" onclick="updateStatus(${stepNum}, 'Done')">Done</button>
-                </div>
-            `;
-            list.appendChild(card);
+            if (tasks.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:#64748b; padding: 20px;">🎉 All PO tasks are complete! No pending items.</p>';
+                return;
+            }
+
+            list.innerHTML = '';
+            tasks.forEach(task => {
+                const card = document.createElement('div');
+                card.className = 'task-card';
+                card.id = `task-row-${task.row}`;
+                card.innerHTML = `
+                    <div>
+                        <div class="task-meta">
+                            <span class="badge-po">PO: ${task.poNumber}</span>
+                            <span class="badge-container">Containers: ${task.containerNos}</span>
+                            <span class="badge-step">STEP ${task.step} / 44</span>
+                        </div>
+                        <div class="task-title">${task.title}</div>
+                        <div class="date-info">
+                            📅 <strong>Target Planned Date:</strong> ${task.plannedDate.split(' ')[0]}
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn-done" onclick="markTaskDone(${task.row})">Mark Done ✓</button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        } catch (e) {
+            list.innerHTML = 'Error loading tasks. Verify Google Script deployment access is set to Anyone.';
+        }
+    }
+
+    async function markTaskDone(row) {
+        // Instantly remove task from UI
+        const card = document.getElementById(`task-row-${row}`);
+        if (card) card.remove();
+
+        // Save actual completion timestamp in Google Sheet
+        await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: "MARK_DONE", row: row })
         });
     }
 
-    async function updateStatus(step, newStatus) {
-        taskStatuses[step] = newStatus;
-        
-        // Update UI immediately
-        const card = document.querySelector(`.task-card:nth-child(${step})`);
-        if (card) {
-            card.setAttribute('data-status', newStatus);
-            document.getElementById(`status-text-${step}`).innerText = newStatus;
-        }
+    async function createNewPO() {
+        const poNumber = document.getElementById('poNumber').value.trim();
+        const containerNos = document.getElementById('containerNos').value.trim();
+        const startDate = document.getElementById('startDate').value;
+        const gapDays = document.getElementById('gapDays').value;
 
-        // Send update to Google Sheet in background
-        try {
-            await fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ step: step, status: newStatus })
-            });
-        } catch (e) {
-            console.error("Failed to update status in Google Sheet:", e);
-        }
+        if (!poNumber) { alert("Please enter a Purchase Order (PO) Number."); return; }
+
+        await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                action: "NEW_PO",
+                poNumber: poNumber,
+                containerNos: containerNos,
+                startDate: startDate,
+                gapDays: gapDays
+            })
+        });
+
+        alert(`PO ${poNumber} initialized with 44 auto-scheduled steps!`);
+        document.getElementById('poNumber').value = '';
+        document.getElementById('containerNos').value = '';
+        loadTasks();
     }
 
-    // Render immediately on page load
-    renderTasks();
+    loadTasks();
 </script>
 </body>
 </html>
