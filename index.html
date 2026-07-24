@@ -1,1 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thailand Import Tracking System</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --primary: #0f172a;
+            --pending: #f59e0b;
+            --approved: #3b82f6;
+            --done: #10b981;
+        }
 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: #334155;
+            margin: 0;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: var(--primary);
+            margin: 0 0 8px 0;
+        }
+
+        .task-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 6px solid #cbd5e1;
+        }
+
+        .task-card[data-status="Pending"] { border-left-color: var(--pending); }
+        .task-card[data-status="Approved"] { border-left-color: var(--approved); }
+        .task-card[data-status="Done"] { border-left-color: var(--done); }
+
+        .task-info {
+            flex: 1;
+            padding-right: 16px;
+        }
+
+        .step-num {
+            font-size: 0.8em;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .task-title {
+            font-size: 1em;
+            font-weight: 600;
+            margin: 4px 0;
+            color: #1e293b;
+        }
+
+        .status-badge {
+            font-size: 0.85em;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: #f1f5f9;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        button {
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85em;
+            cursor: pointer;
+            color: white;
+            transition: opacity 0.2s;
+        }
+
+        button:hover { opacity: 0.85; }
+        .btn-pending { background-color: var(--pending); }
+        .btn-approved { background-color: var(--approved); }
+        .btn-done { background-color: var(--done); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Double A - Import Process Tracker</h1>
+        <p>Complete each step in order to prevent penalties.</p>
+    </div>
+
+    <div id="taskList">Loading steps...</div>
+</div>
+
+<script>
+    // Paste your Web App URL generated from Google Apps Script here
+    const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+
+    const steps = [
+        "Receive Proforma Invoice (PI) then Check and Confirm PI qty and port",
+        "Check all details of PI sent by mill and resend signed PI to mill",
+        "Approve draft Commercial Invoice by mill",
+        "Check Commercial Invoice and send to mill again",
+        "Track containers for 1 week",
+        "Email documents (Commercial Invoice, Packing list, Container list, BL, Insurance, Form) to CHA",
+        "File PIMS with details about containers",
+        "Track ship or container daily wherever container was not arrived",
+        "Track original document given by Double A",
+        "Receive draft Bill of Entry by CHA",
+        "Check draft Bill of Entry and submit for approval",
+        "Hand over original physical documents to CHA",
+        "Track status after container arrives at port",
+        "At time of Rail-out CHA submits Bill of Entry",
+        "Obtain and check OCC (Out of Charges Copy) & Gate Pass",
+        "Pay Duty & E-challan between Port to destination",
+        "Ask CMA for shipping line amount & Invoice",
+        "Check shipping line invoice and make payment",
+        "Pay advance payment to DICT for cleaners",
+        "Provide authority letter to shipping line",
+        "E-Bond print and generate",
+        "Sign E-Bond by Mr. Pranav Satija",
+        "Verify sign by bank",
+        "Give original bond to CHA",
+        "Pay shipping line due to DICT and get gate pass",
+        "Receive DICT invoice",
+        "Give Gate pass, DO, Bill of entry, OCC & Gate Pass to transporter",
+        "Create E-way bill and give to transporter",
+        "Follow-up with Driver during transit",
+        "If container damaged: email shipping line immediately",
+        "If damage is big: pay damage amount to shipping line (₹2000/container)",
+        "Give bill to transporter",
+        "Mark Payment of mill (Double A)",
+        "Approve Payment amount of Double A by Mr. Pranav Satija",
+        "Email approval screenshot to Bank",
+        "Receive MT103 from bank",
+        "Email MT103 to Double A for payment confirmation",
+        "Receive email about payment amount, bank charges, and commission",
+        "Create costing sheet about expenses",
+        "Send costing sheet to Mr. Pranav Satija",
+        "Mark Knock-off Bill of Entry",
+        "Approval of knock-off bill of entry by Mr. Pranav Satija",
+        "Acknowledgment of knock-off entry by bank",
+        "Receive bill from clearing agent, check, pay, and deduct TDS"
+    ];
+
+    let currentStatuses = {};
+
+    async function loadData() {
+        if (GOOGLE_SCRIPT_URL === "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE") {
+            renderUI();
+            return;
+        }
+
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL);
+            const data = await res.json();
+            data.forEach(item => {
+                currentStatuses[item.step] = item.status;
+            });
+        } catch (e) {
+            console.error("Could not fetch data from Google Sheet", e);
+        }
+        renderUI();
+    }
+
+    function renderUI() {
+        const list = document.getElementById('taskList');
+        list.innerHTML = '';
+
+        steps.forEach((taskTitle, index) => {
+            const stepNum = index + 1;
+            const status = currentStatuses[stepNum] || 'Pending';
+
+            const card = document.createElement('div');
+            card.className = 'task-card';
+            card.setAttribute('data-status', status);
+            card.innerHTML = `
+                <div class="task-info">
+                    <div class="step-num">Step ${stepNum}</div>
+                    <div class="task-title">${taskTitle}</div>
+                    <span class="status-badge">Status: ${status}</span>
+                </div>
+                <div class="action-btns">
+                    <button class="btn-pending" onclick="updateStatus(${stepNum}, 'Pending')">Pending</button>
+                    <button class="btn-approved" onclick="updateStatus(${stepNum}, 'Approved')">Approved</button>
+                    <button class="btn-done" onclick="updateStatus(${stepNum}, 'Done')">Done</button>
+                </div>
+            `;
+            list.appendChild(card);
+        });
+    }
+
+    function updateStatus(step, newStatus) {
+        currentStatuses[step] = newStatus;
+        renderUI();
+
+        if (GOOGLE_SCRIPT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE") {
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ step: step, status: newStatus })
+            });
+        }
+    }
+
+    loadData();
+</script>
+</body>
+</html>
