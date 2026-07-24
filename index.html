@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Double A - Import Operations FMS</title>
+    <title>Satija Paper — Import Flowchart System (FMS)</title>
+    <!-- Favicon / Logo on Browser Tab -->
+    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1yncNH52_uB8UKEaz6ut1eoqqMwN0gnEl">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -29,11 +31,26 @@
         .top-bar {
             background-color: var(--primary);
             color: #ffffff;
-            padding: 18px 32px;
+            padding: 14px 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            height: 38px;
+            width: auto;
+            border-radius: 4px;
+            object-fit: contain;
+            background: #ffffff;
+            padding: 2px;
         }
 
         .top-bar h1 {
@@ -41,6 +58,7 @@
             font-size: 1.25rem;
             font-weight: 700;
             letter-spacing: -0.02em;
+            color: #ffffff;
         }
 
         .container {
@@ -59,7 +77,7 @@
         }
 
         .card-title {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 700;
             margin-top: 0;
             margin-bottom: 18px;
@@ -221,7 +239,10 @@
 <body>
 
 <div class="top-bar">
-    <h1>Double A — Import Flowchart System (FMS)</h1>
+    <div class="brand-container">
+        <img src="https://lh3.googleusercontent.com/d/1yncNH52_uB8UKEaz6ut1eoqqMwN0gnEl" alt="Satija Paper Logo" class="brand-logo">
+        <h1>Satija Paper — Import Process System</h1>
+    </div>
     <button class="btn-refresh" onclick="loadTasks()">Refresh Queue</button>
 </div>
 
@@ -262,7 +283,6 @@
 </div>
 
 <script>
-    // REPLACE THIS WITH YOUR DEPLOYED APPS SCRIPT URL
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqba4-K1sdv3ugha_1gDGAyqmgUUZYXn6tXLNz0KM6i8iNIeRCP-cXMzqAxQTQLpQf/exec";
 
     document.getElementById('startDate').valueAsDate = new Date();
@@ -347,7 +367,6 @@
             document.getElementById('poNumber').value = '';
             document.getElementById('containerNos').value = '';
             
-            // Wait 1.5s for Google Sheets backend to process the batch insert before refreshing
             setTimeout(loadTasks, 1500);
         } catch (e) {
             alert("Failed to submit PO. Please try again.");
