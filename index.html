@@ -297,7 +297,7 @@
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqba4-K1sdv3ugha_1gDGAyqmgUUZYXn6tXLNz0KM6i8iNIeRCP-cXMzqAxQTQLpQf/exec";
-    const SECRET_KEY = "Satija@Paper2026#SecureKey";
+    const SECRET_KEY = "SatijaPaper2026SecureKey"; // Must match SECRET_KEY in Code.gs exactly
 
     document.getElementById('startDate').valueAsDate = new Date();
 
@@ -316,6 +316,7 @@
         list.innerHTML = '<div class="empty-state">Fetching active tasks...</div>';
 
         try {
+            // Pass the key as a query parameter in the fetch URL
             const response = await fetch(`${GOOGLE_SCRIPT_URL}?key=${encodeURIComponent(SECRET_KEY)}`);
             const tasks = await response.json();
 
