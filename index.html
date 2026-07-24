@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Satija Paper — Import Flowchart System (FMS)</title>
-    <!-- Favicon / Logo on Browser Tab -->
-    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1yncNH52_uB8UKEaz6ut1eoqqMwN0gnEl">
+
+    <!-- Local Favicon from your GitHub Repo -->
+    <link rel="icon" type="image/png" href="./logo (1).png">
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -31,7 +33,7 @@
         .top-bar {
             background-color: var(--primary);
             color: #ffffff;
-            padding: 14px 32px;
+            padding: 12px 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -41,16 +43,25 @@
         .brand-container {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
+        }
+
+        .brand-logo-wrapper {
+            background: #ffffff;
+            padding: 4px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            width: 40px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
 
         .brand-logo {
-            height: 38px;
-            width: auto;
-            border-radius: 4px;
+            height: 100%;
+            width: 100%;
             object-fit: contain;
-            background: #ffffff;
-            padding: 2px;
         }
 
         .top-bar h1 {
@@ -240,7 +251,10 @@
 
 <div class="top-bar">
     <div class="brand-container">
-        <img src="https://lh3.googleusercontent.com/d/1yncNH52_uB8UKEaz6ut1eoqqMwN0gnEl" alt="Satija Paper Logo" class="brand-logo">
+        <div class="brand-logo-wrapper">
+            <!-- Uses logo (1).png directly from your repository -->
+            <img src="./logo (1).png" alt="Satija Paper Logo" class="brand-logo">
+        </div>
         <h1>Satija Paper — Import Process System</h1>
     </div>
     <button class="btn-refresh" onclick="loadTasks()">Refresh Queue</button>
