@@ -252,7 +252,6 @@
 <div class="top-bar">
     <div class="brand-container">
         <div class="brand-logo-wrapper">
-            <!-- Uses logo (1).png directly from your repository -->
             <img src="./logo (1).png" alt="Satija Paper Logo" class="brand-logo">
         </div>
         <h1>Satija Paper — Import Process System</h1>
@@ -298,6 +297,7 @@
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqba4-K1sdv3ugha_1gDGAyqmgUUZYXn6tXLNz0KM6i8iNIeRCP-cXMzqAxQTQLpQf/exec";
+    const SECRET_KEY = "Satija@Paper2026#SecureKey";
 
     document.getElementById('startDate').valueAsDate = new Date();
 
@@ -316,7 +316,7 @@
         list.innerHTML = '<div class="empty-state">Fetching active tasks...</div>';
 
         try {
-            const response = await fetch(GOOGLE_SCRIPT_URL);
+            const response = await fetch(`${GOOGLE_SCRIPT_URL}?key=${encodeURIComponent(SECRET_KEY)}`);
             const tasks = await response.json();
 
             if (!tasks || tasks.length === 0) {
@@ -369,6 +369,7 @@
                 mode: 'no-cors',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify({
+                    key: SECRET_KEY,
                     action: "NEW_PO",
                     poNumber: poNumber,
                     containerNos: containerNos,
@@ -395,7 +396,11 @@
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: "MARK_DONE", row: row })
+            body: JSON.stringify({
+                key: SECRET_KEY,
+                action: "MARK_DONE",
+                row: row
+            })
         });
 
         if (card) card.remove();
